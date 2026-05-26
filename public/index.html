@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LifxAi — Discord Bot Public</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <div class="background-gradient"></div>
+    
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="container">
+            <div class="logo">
+                <span>💙</span>
+                <span>LIFX AI</span>
+            </div>
+            <div class="nav-links">
+                <a href="/">Home</a>
+                <a href="#features">Features</a>
+                <a href="#commands">Commands</a>
+                <a href="/dashboard" class="btn btn-outline">Dashboard</a>
+                <a href="/auth/discord" class="btn btn-primary">Login</a>
+            </div>
+        </div>
+    </nav>
+    
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="container">
+            <h1>Discord Bot<br><span style="color: var(--primary);">Powerful & Easy to Use</span></h1>
+            <p class="subtitle">Bot Discord dengan 50+ fitur lengkap. Moderation, Economy, Fun, AI, dan masih banyak lagi. Gratis untuk semua server!</p>
+            <div style="display: flex; gap: 16px; justify-content: center;">
+                <a href="/auth/discord" class="btn btn-primary">🎮 Login with Discord</a>
+                <a href="#" class="btn btn-outline" id="inviteBtn">➕ Invite Bot</a>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Stats Section -->
+    <div class="container">
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-value" id="statServers">0</div>
+                <div class="stat-label">Active Servers</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="statUsers">0</div>
+                <div class="stat-label">Total Users</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="statCommands">0</div>
+                <div class="stat-label">Commands</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="statPing">0</div>
+                <div class="stat-label">Ping (ms)</div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Features Section -->
+    <div class="container" id="features">
+        <h2 style="text-align: center; font-size: 32px; margin-bottom: 48px;">✨ <span style="color: var(--primary);">Fitur Lengkap</span> ✨</h2>
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon">🛡️</div>
+                <h3>Moderation Tools</h3>
+                <p>Kick, ban, clear, warn, slowmode — lengkapi kebutuhan moderasi server lo.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">💰</div>
+                <h3>Economy System</h3>
+                <p>Daily reward, work, balance, leaderboard — bikin server lo makin seru.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🤖</div>
+                <h3>AI Chatbot</h3>
+                <p>Chat sama AI pake command `/ai` — bisa jawab pertanyaan apapun.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🎮</div>
+                <h3>Fun Commands</h3>
+                <p>Meme, joke, quote, avatar, userinfo — hiburan buat member server.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">📊</div>
+                <h3>Real-time Stats</h3>
+                <p>Pantau statistik server dan user dengan mudah.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🌐</div>
+                <h3>Web Dashboard</h3>
+                <p>Kelola bot dari dashboard web yang modern dan responsif.</p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Commands Section -->
+    <div class="container" id="commands">
+        <h2 style="text-align: center; font-size: 32px; margin-bottom: 24px;">⚡ <span style="color: var(--primary);">Daftar Commands</span> ⚡</h2>
+        <div class="commands-grid" id="commandsGrid"></div>
+    </div>
+    
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <p>💙 <strong>LIFX AI</strong> — Discord Bot Public Edition 💙</p>
+            <p>Bot by: <strong>ANGGA GANTENG</strong> | Dark Media Network</p>
+            <p style="margin-top: 16px; font-size: 12px;">
+                <a href="/privacy" style="color: var(--primary);">Privacy Policy</a> | 
+                <a href="/terms" style="color: var(--primary);">Terms of Service</a>
+            </p>
+        </div>
+    </footer>
+    
+    <script>
+        async function fetchStats() {
+            try {
+                const res = await fetch('/api/bot/stats');
+                const data = await res.json();
+                document.getElementById('statServers').innerText = data.servers || 0;
+                document.getElementById('statUsers').innerText = data.users || 0;
+                document.getElementById('statCommands').innerText = data.commands || 0;
+                document.getElementById('statPing').innerText = data.ping || 0;
+            } catch(e) {}
+        }
+        
+        async function fetchCommands() {
+            try {
+                const res = await fetch('/api/commands');
+                const commands = await res.json();
+                const grid = document.getElementById('commandsGrid');
+                grid.innerHTML = '';
+                commands.slice(0, 24).forEach(cmd => {
+                    const badge = document.createElement('div');
+                    badge.className = 'command-badge';
+                    badge.innerText = `/${cmd}`;
+                    grid.appendChild(badge);
+                });
+            } catch(e) {}
+        }
+        
+        document.getElementById('inviteBtn')?.addEventListener('click', async () => {
+            const res = await fetch('/api/invite');
+            const data = await res.json();
+            window.open(data.url, '_blank');
+        });
+        
+        fetchStats();
+        fetchCommands();
+        setInterval(fetchStats, 30000);
+    </script>
+</body>
+</html>
