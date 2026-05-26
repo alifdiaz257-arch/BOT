@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard — LifxAi Bot</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="logo" style="justify-content: center;">
+                <span>💙</span>
+                <span>LIFX AI</span>
+            </div>
+            <ul class="sidebar-menu">
+                <li><a href="#" onclick="showSection('dashboard')" class="active" id="nav-dashboard">📊 Dashboard</a></li>
+                <li><a href="#" onclick="showSection('servers')" id="nav-servers">🖥️ My Servers</a></li>
+                <li><a href="#" onclick="showSection('commands')" id="nav-commands">⚡ Commands</a></li>
+                <li><a href="#" onclick="showSection('settings')" id="nav-settings">⚙️ Settings</a></li>
+                <li><hr style="margin: 20px 0; border-color: var(--gray-200);"></li>
+                <li><a href="/logout">🚪 Logout</a></li>
+            </ul>
+            <div style="margin-top: auto; text-align: center; font-size: 11px; color: var(--gray-400); padding-top: 40px;">
+                Bot by ANGGA GANTENG
+            </div>
+        </aside>
+        
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Header -->
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px;">
+                <h1>Welcome back, <span id="username" style="color: var(--primary);">User</span> 👋</h1>
+                <div style="display: flex; align-items: center; gap: 16px;">
+                    <div class="user-avatar" id="userAvatar">A</div>
+                </div>
+            </div>
+            
+            <!-- Dashboard Section -->
+            <div id="dashboardSection">
+                <div class="stats-grid">
+                    <div class="stat-card"><div class="stat-value" id="statUptime">0</div><div class="stat-label">Uptime (hours)</div></div>
+                    <div class="stat-card"><div class="stat-value" id="statPing">0</div><div class="stat-label">Ping (ms)</div></div>
+                    <div class="stat-card"><div class="stat-value" id="statServers">0</div><div class="stat-label">Servers</div></div>
+                    <div class="stat-card"><div class="stat-value" id="statUsers">0</div><div class="stat-label">Users</div></div>
+                    <div class="stat-card"><div class="stat-value" id="statCommands">0</div><div class="stat-label">Commands</div></div>
+                    <div class="stat-card"><div class="stat-value" id="statStatus">●</div><div class="stat-label">Bot Status</div></div>
+                </div>
+            </div>
+            
+            <!-- Servers Section -->
+            <div id="serversSection" style="display: none;">
+                <h2 style="margin-bottom: 24px;">🖥️ Your Servers</h2>
+                <div class="servers-grid" id="serversGrid"></div>
+            </div>
+            
+            <!-- Commands Section -->
+            <div id="commandsSection" style="display: none;">
+                <h2 style="margin-bottom: 24px;">⚡ All Commands</h2>
+                <div class="commands-grid" id="commandsGrid"></div>
+            </div>
+            
+            <!-- Settings Section -->
+            <div id="settingsSection" style="display: none;">
+                <h2 style="margin-bottom: 24px;">⚙️ Settings</h2>
+                <div style="background: white; border-radius: 24px; padding: 32px; border: 1px solid var(--gray-200);">
+                    <p style="margin-bottom: 16px;">🌙 <strong>Theme:</strong> Light / Dark (Coming Soon)</p>
+                    <p style="margin-bottom: 16px;">🔔 <strong>Notifications:</strong> Enabled</p>
+                    <p style="margin-bottom: 16px;">🔄 <strong>Auto-refresh:</strong> Every 10 seconds</p>
+                    <p>💙 <strong>Bot Owner:</strong> ANGGA GANTENG</p>
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <script>
+        async function fetchUser() {
+            const res = await fetch('/api/user');
+            const data = await res.json();
+            if (data.error) { window.location.href = '/'; return; }
+            document.getElementById('username').innerText = data.username;
+            document.getElementById('userAvatar').innerText = data.username.charAt(0).toUpperCase();
+        }
+        
+        async function fetchStats() {
+            const res = await fetch('/api/bot/stats');
+            const data = await res.json();
+            document.getElementById('statUptime').innerText = Math.floor(data.uptime / 3600);
+            document.getElementById('statPing').innerText = data.ping;
+            document.getElementById('statServers').innerText = data.servers;
+            document.getElementById('statUsers').innerText = data.users;
+            document.getElementById('statCommands').innerText = data.commands;
+            document.getElementById('statStatus').innerHTML = data.status === 'online' ? '🟢 Online' : '🔴 Offline';
+        }
+        
+        async function fetchServers() {
+            const res = await fetch('/api/servers');
+            const servers = await res.json();
+            const grid = document.getElementById('serversGrid');
+            grid.innerHTML = '';
+            if (!servers.length) {
+                grid.innerHTML = '<p style="color: gray;">Belum ada server yang lo invite bot ini...</p>';
+                return;
+            }
+            servers.forEach(server => {
+                const card = document.createElement('div');
+                card.className = 'server-card';
+                card.innerHTML = `
+                    <div class="user-avatar" style="width: 50px; height: 50px;">${server.name.charAt(0)}</div>
+                    <div><strong>${server.name}</strong><br><span style="font-size: 12px; color: gray;">ID: ${server.id}</span></div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+        
+        async function fetchCommands() {
+            const res = await fetch('/api/commands');
+            const commands = await res.json();
+            const grid = document.getElementById('commandsGrid');
+            grid.innerHTML = '';
+            commands.forEach(cmd => {
+                const badge = document.createElement('div');
+                badge.className = 'command-badge';
+                badge.innerText = `/${cmd}`;
+                grid.appendChild(badge);
+            });
+        }
+        
+        function showSection(section) {
+            document.getElementById('dashboardSection').style.display = 'none';
+            document.getElementById('serversSection').style.display = 'none';
+            document.getElementById('commandsSection').style.display = 'none';
+            document.getElementById('settingsSection').style.display = 'none';
+            
+            document.querySelectorAll('.sidebar-menu a').forEach(a => a.classList.remove('active'));
+            
+            if (section === 'dashboard') {
+                document.getElementById('dashboardSection').style.display = 'block';
+                document.getElementById('nav-dashboard')?.classList.add('active');
+            }
+            if (section === 'servers') {
+                document.getElementById('serversSection').style.display = 'block';
+                document.getElementById('nav-servers')?.classList.add('active');
+                fetchServers();
+            }
+            if (section === 'commands') {
+                document.getElementById('commandsSection').style.display = 'block';
+                document.getElementById('nav-commands')?.classList.add('active');
+                fetchCommands();
+            }
+            if (section === 'settings') {
+                document.getElementById('settingsSection').style.display = 'block';
+                document.getElementById('nav-settings')?.classList.add('active');
+            }
+        }
+        
+        fetchUser();
+        fetchStats();
+        fetchServers();
+        setInterval(fetchStats, 10000);
+    </script>
+</body>
+</html>
