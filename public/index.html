@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LifxAi — Discord Bot Public</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- PERBAIKAN: pakai /css/style.css BUKAN css/style.css -->
     <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
@@ -41,7 +42,7 @@
     
     <!-- Stats Section -->
     <div class="container">
-        <div class="stats-grid">
+        <div class="stats-grid" id="statsGrid">
             <div class="stat-card">
                 <div class="stat-value" id="statServers">0</div>
                 <div class="stat-label">Active Servers</div>
@@ -78,7 +79,7 @@
             <div class="feature-card">
                 <div class="feature-icon">🤖</div>
                 <h3>AI Chatbot</h3>
-                <p>Chat sama AI pake command `/ai` — bisa jawab pertanyaan apapun.</p>
+                <p>Chat sama AI pake command /ai — bisa jawab pertanyaan apapun.</p>
             </div>
             <div class="feature-card">
                 <div class="feature-icon">🎮</div>
@@ -125,7 +126,9 @@
                 document.getElementById('statUsers').innerText = data.users || 0;
                 document.getElementById('statCommands').innerText = data.commands || 0;
                 document.getElementById('statPing').innerText = data.ping || 0;
-            } catch(e) {}
+            } catch(e) {
+                console.error('Stats error:', e);
+            }
         }
         
         async function fetchCommands() {
@@ -133,20 +136,28 @@
                 const res = await fetch('/api/commands');
                 const commands = await res.json();
                 const grid = document.getElementById('commandsGrid');
-                grid.innerHTML = '';
-                commands.slice(0, 24).forEach(cmd => {
-                    const badge = document.createElement('div');
-                    badge.className = 'command-badge';
-                    badge.innerText = `/${cmd}`;
-                    grid.appendChild(badge);
-                });
-            } catch(e) {}
+                if (grid) {
+                    grid.innerHTML = '';
+                    commands.forEach(cmd => {
+                        const badge = document.createElement('div');
+                        badge.className = 'command-badge';
+                        badge.innerText = `/${cmd.name || cmd}`;
+                        grid.appendChild(badge);
+                    });
+                }
+            } catch(e) {
+                console.error('Commands error:', e);
+            }
         }
         
         document.getElementById('inviteBtn')?.addEventListener('click', async () => {
-            const res = await fetch('/api/invite');
-            const data = await res.json();
-            window.open(data.url, '_blank');
+            try {
+                const res = await fetch('/api/invite');
+                const data = await res.json();
+                window.open(data.url, '_blank');
+            } catch(e) {
+                console.error('Invite error:', e);
+            }
         });
         
         fetchStats();
